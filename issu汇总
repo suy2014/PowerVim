@@ -1,0 +1,98 @@
+第 42 行:
+E197: 不能设定语言为 "zh_CN.gb2312"
+Taglist: Exuberant ctags (http://ctags.sf.net) not found in PATH. Plugin is not loaded.
+请按 ENTER 或其它命令继续
+
+1.系统语言问题
+ubuntu中文支持，及中文乱码问题
+
+该篇博文，是本人踩了一下午的坑的成果，亲测有效。对服务器同样有效。
+
+状况：所用的ubuntu系统不支持中文，遇见中文就????。ORZ…
+
+目标：使系统/服务器支持中文，能够正常显示。
+
+首先，安装中文支持包language-pack-zh-hans：
+
+$ sudo apt-get install language-pack-zh-hans
+然后，修改/etc/environment（在文件的末尾追加）：
+
+LANG="zh_CN.UTF-8"
+LANGUAGE="zh_CN:zh:en_US:en"
+再修改/var/lib/locales/supported.d/local(没有这个文件就新建，同样在末尾追加)：
+
+en_US.UTF-8 UTF-8
+zh_CN.UTF-8 UTF-8
+zh_CN.GBK GBK
+zh_CN GB2312
+最后，执行命令：
+
+$ sudo locale-gen
+对于中文乱码是空格的情况，安装中文字体解决。
+
+$ sudo apt-get install fonts-droid-fallback ttf-wqy-zenhei ttf-wqy-microhei fonts-arphic-ukai fonts-arphic-uming
+以上，问题解决，中文显示正常。:)
+
+
+
+perl: warning: Setting locale failed.   
+perl: warning: Please check that your locale settings:   
+        LANGUAGE = "en_US:en",   
+        LC_ALL = (unset),   
+        LC_MESSAGES = "en_US.UTF-8",   
+        LANG = "en_US.UTF-8"   
+    are supported and installed on your system.   
+perl: warning: Falling back to the standard locale ("C").   
+locale: Cannot set LC_CTYPE to default locale: No such file or directory   
+locale: Cannot set LC_MESSAGES to default locale: No such file or directory   
+locale: Cannot set LC_ALL to default locale: No such file or directory   
+(Reading database ... 21173 files and directories currently installed.)  
+Removing bind9 ...  
+ * Stopping domain name service... bind9                                        [ OK ]
+Processing triggers for man-db ...   
+locale: Cannot set LC_CTYPE to default locale: No such file or directory   
+locale: Cannot set LC_MESSAGES to default locale: No such file or directory   
+locale: Cannot set LC_ALL to default locale: No such file or directory 
+
+
+
+解决办法：
+
+First run locale to list what locales currently defined for the current user account:
+
+$ locale
+LANG=C
+LANGUAGE=
+LC_CTYPE=fi_FI.UTF-8
+LC_NUMERIC="C"
+LC_TIME="C"
+LC_COLLATE=fi_FI.UTF-8
+LC_MONETARY="C"
+LC_MESSAGES=fi_FI.UTF-8
+LC_PAPER="C"
+LC_NAME="C"
+LC_ADDRESS="C"
+LC_TELEPHONE="C"
+LC_MEASUREMENT="C"
+LC_IDENTIFICATION="C"
+LC_ALL=
+Then generate the missing locale and reconfigure locales to take notice:
+
+$ sudo locale-gen "en_US.UTF-8"
+Generating locales...
+  en_US.UTF-8... done
+Generation complete.
+
+$ sudo dpkg-reconfigure locales
+Generating locales...
+  en_US.UTF-8... up-to-date
+Generation complete.
+
+2.问题3：应该是taglist.vim插件的问题：在~/.vimrc 文件中加入如下三行就可以了
+let Tlist_Show_One_File=1 "不同时显示多个文件的tag，只显示当前文件的
+let Tlist_Exit_OnlyWindow=1 "如果taglist窗口是最后一个窗口，则退出vim
+let Tlist_Ctags_Cmd="/usr/bin/ctags" "将taglist与ctags关联（引用其他解决方法）
+最后结果：代码跳转使用功能不行，其它正常运作
+
+
+至于全局搜索，首先你的系统要按照了 ack，你在命令号终端 敲一下 ack 看看有没有按照，没有的话，就安装一下
